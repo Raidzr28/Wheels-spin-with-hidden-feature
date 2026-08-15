@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Wheel face -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M28,54 a26,26 0 1,0 52,0 a26,26 0 1,0 -52,0 Z" />
+
+    <!-- Slice dividers: an upright cross plus the same cross rotated 45 degrees -->
+    <group>
+        <path
+            android:fillColor="#FF00629E"
+            android:pathData="M28,52.5 L80,52.5 L80,55.5 L28,55.5 Z" />
+        <path
+            android:fillColor="#FF00629E"
+            android:pathData="M52.5,28 L55.5,28 L55.5,80 L52.5,80 Z" />
+    </group>
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="45">
+        <path
+            android:fillColor="#FF00629E"
+            android:pathData="M28,52.5 L80,52.5 L80,55.5 L28,55.5 Z" />
+        <path
+            android:fillColor="#FF00629E"
+            android:pathData="M52.5,28 L55.5,28 L55.5,80 L52.5,80 Z" />
+    </group>
+
+    <!-- Hub -->
+    <path
+        android:fillColor="#FF263238"
+        android:pathData="M48,54 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 Z" />
+
+    <!-- Pointer at 12 o'clock -->
+    <path
+        android:fillColor="#FF263238"
+        android:pathData="M54,34 L47,22 L61,22 Z" />
+</vector>
