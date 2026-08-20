@@ -54,16 +54,20 @@ class PickerViewModel(app: Application) : AndroidViewModel(app) {
      * That return value is the whole confirmation scheme, and it is why this replaced the earlier
      * gesture: it is visible on screen and does not depend on the vibrator working.
      *
-     * - `**Alex`, `**3` or `**al` arm a name already on the wheel — see [resolveTarget]. The field
-     *   clears. A name that matches nothing leaves the text sitting there, so it looks exactly
-     *   like the add button failing rather than silently doing nothing at all.
-     * - `**3,1,5` queues up to [MAX_PRESELECTED] winners in order: first spin lands on the third
-     *   name, the next on the first, and so on. Spins past the end of the queue are random again.
+     * The queue is FIFO and every command appends to it, so winners can be lined up one name at
+     * a time — `**Alex` then `**Bob` lands Alex first, Bob second — without having to type the
+     * whole order in one go, or remember what was already armed.
+     *
+     * - `**Alex`, `**3` or `**al` append a name already on the wheel — see [resolveTarget]. The
+     *   field clears. A name that matches nothing leaves the text sitting there, so it looks
+     *   exactly like the add button failing rather than silently doing nothing at all.
+     * - `**3,1,5` appends several at once. The queue holds at most [MAX_PRESELECTED]; a command
+     *   that would overflow it is rejected whole. Spins past the end of the queue are random again.
      * - `**` on its own clears the queue, and likewise only clears the field if one was set.
      * - Anything else is added as names, exactly as before.
      *
-     * A queue is applied all-or-nothing. One unrecognised entry rejects the whole command and
-     * leaves the previous queue untouched, so a half-applied order can never go unnoticed.
+     * A command is applied all-or-nothing. One unrecognised entry rejects the whole command and
+     * leaves the existing queue untouched, so a half-applied order can never go unnoticed.
      */
     fun submitNameField(raw: String): Boolean {
         val text = raw.trim()
@@ -86,12 +90,11 @@ class PickerViewModel(app: Application) : AndroidViewModel(app) {
             return true
         }
 
-        if (targets.size > MAX_PRESELECTED) return false
+        if (preselected.size + targets.size > MAX_PRESELECTED) return false
 
         // Resolve every entry before touching the queue, so a rejected command changes nothing.
         val resolved = targets.map { resolveTarget(it) ?: return false }
 
-        preselected.clear()
         resolved.forEach { preselected.addLast(it.id) }
         if (hapticsEnabled) buzzer.armed()
         return true
@@ -258,14 +261,14 @@ class PickerViewModel(app: Application) : AndroidViewModel(app) {
         /** Marks input as a pre-selection command instead of a name to add. */
         const val COMMAND_PREFIX = "**"
 
-        /** Longest run of winners a single command may queue. */
+        /** Longest run of winners the queue may hold. */
         const val MAX_PRESELECTED = 10
 
         // How long one spin runs, and how far it travels. Keep these in step: turns divided by
         // seconds is the average speed, and holding it near 1.4 turns/s is what stops a longer
         // spin from merely feeling sluggish.
-        val SPIN_DURATION_MS = 6500..9000
-        val SPIN_TURNS = 8..13
+        val SPIN_DURATION_MS = 11000..15000
+        val SPIN_TURNS = 14..21
         const val MAX_HISTORY = 50
         val SPIN_EASING = CubicBezierEasing(0.12f, 0.72f, 0.08f, 1f)
     }
