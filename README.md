@@ -6,7 +6,7 @@ one of them.
 ## Features
 
 - Spinning wheel with coloured slices, per-slice labels, and a fixed pointer at 12 o'clock
-- Spins run 6.5–9s over 8–13 turns; tune `SPIN_DURATION_MS` and `SPIN_TURNS` in `PickerViewModel`
+- Spins run 11–15s over 14–21 turns; tune `SPIN_DURATION_MS` and `SPIN_TURNS` in `PickerViewModel`
 - Add names one at a time or paste a comma/newline separated list
 - Rename, delete, shuffle, clear all
 - Names persist across restarts (SharedPreferences)

@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import java.security.SecureRandom
+import java.util.concurrent.atomic.AtomicLong
 
 class PickerViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -18,6 +19,17 @@ class PickerViewModel(app: Application) : AndroidViewModel(app) {
     private val buzzer = Buzzer(app)
 
     val names = mutableStateListOf<Entry>().apply { addAll(repo.loadNames()) }
+
+    /**
+     * Source of entry ids, continuing past the highest one already saved.
+     *
+     * Ids used to come from the clock, which handed the same id to every name added within one
+     * millisecond — and a pasted block reserved one id per name, so the collision window was as
+     * many milliseconds as the block was long. Two entries sharing an id is not cosmetic: deleting
+     * one deletes all of them, and a queued winner resolves to whichever of them the list holds
+     * first, so a rigged spin lands on the wrong name.
+     */
+    private val nextId = AtomicLong((names.maxOfOrNull { it.id } ?: 0L) + 1L)
 
     var isSpinning by mutableStateOf(false)
         private set
@@ -206,8 +218,8 @@ class PickerViewModel(app: Application) : AndroidViewModel(app) {
         rawBlock.split('\n', ',')
             .map { it.trim() }
             .filter { it.isNotEmpty() }
-            .forEachIndexed { index, name ->
-                names.add(Entry(System.currentTimeMillis() + index, name))
+            .forEach { name ->
+                names.add(Entry(nextId.getAndIncrement(), name))
             }
         persist()
     }
